@@ -1,0 +1,23 @@
+# To stop macOS's complaint about running bash
+if [[ "$OSTYPE" == darwin* ]]; then
+  export BASH_SILENCE_DEPRECATION_WARNING=1
+  if [ -x /opt/homebrew/bin/brew ]; then
+      eval "$(/opt/homebrew/bin/brew shellenv bash)"
+  else
+      echo "[WARN] Missing homebrew on a macos machine"
+  fi
+fi
+
+# Native installer for Claude Code puts the binary here.
+export PATH="$HOME/.local/bin:$PATH"
+
+# Prompt: current directory, then the git branch (or short commit when
+# detached) anywhere inside a repo, e.g. "~/dev/dotfiles (main) $ ".
+# Colours are ANSI numbers, so they follow the terminal profile.
+__prompt_git() {
+  local ref
+  ref=$(git symbolic-ref --short HEAD 2>/dev/null) ||
+    ref=$(git rev-parse --short HEAD 2>/dev/null) || return
+  printf ' (%s)' "$ref"
+}
+PS1='\[\e[34m\]\w\[\e[32m\]$(__prompt_git)\[\e[0m\] \$ '

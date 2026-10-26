@@ -22,12 +22,13 @@
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
-
 ;; use-package is built in from Emacs 29; older versions need to install.
 (when (< emacs-major-version 29)
   (straight-use-package 'use-package))
-
 ;; Configure 'use-package' to install packages through 'straight.el'
 (setq straight-use-package-by-default t)
+
+;; Disable the menu bar. Done in 'early-init.el' before any frame is drawn.
+(menu-bar-mode -1)
 
 ;;; early-init.el ends here
