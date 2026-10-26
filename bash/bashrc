@@ -20,4 +20,16 @@ __prompt_git() {
     ref=$(git rev-parse --short HEAD 2>/dev/null) || return
   printf ' (%s)' "$ref"
 }
-PS1='\[\e[34m\]\w\[\e[32m\]$(__prompt_git)\[\e[0m\] \$ '
+# The last command's exit status in red, e.g. " [127]", only when non-zero.
+# It's saved in PROMPT_COMMAND because expanding $(__prompt_git) would
+# overwrite $? before the prompt gets to it. Prepended once, so re-sourcing
+# this file or other tools' PROMPT_COMMANDs don't clobber it.
+__prompt_save_status() { __prompt_status=$?; }
+__prompt_code() {
+  [ "${__prompt_status:-0}" -ne 0 ] && printf ' [%s]' "$__prompt_status"
+}
+case "$PROMPT_COMMAND" in
+  *__prompt_save_status*) ;;
+  *) PROMPT_COMMAND="__prompt_save_status${PROMPT_COMMAND:+; $PROMPT_COMMAND}" ;;
+esac
+PS1='\[\e[34m\]\w\[\e[32m\]$(__prompt_git)\[\e[31m\]$(__prompt_code)\[\e[0m\] \$ '

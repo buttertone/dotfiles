@@ -58,6 +58,36 @@
   :init
   (marginalia-mode 1))
 
+;;; Org
+
+;;   C-c c t  quick capture (TRIAGE)    C-c a r  everything still in TRIAGE
+;;   C-c c w  detailed capture (TODO)   C-c a d  today's agenda, no TRIAGE
+(use-package org
+  ;; Built in; without this straight would fetch org from source.
+  :straight (:type built-in)
+  :bind (("C-c c" . org-capture)
+         ("C-c a" . org-agenda))
+  :custom
+  (org-directory "~/org")
+  (org-agenda-files '("~/org"))
+  (org-todo-keywords
+   '((sequence "TRIAGE(r)" "TODO(t)" "RELEASE(l)" "|" "DONE(d)")))
+  ;; Relative file names resolve against `org-directory'.
+  (org-capture-templates
+   '(("t" "Triage (quick)" entry (file "inbox.org")
+      "* TRIAGE %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n")
+     ("w" "Work (detailed, scheduled)" entry (file "todo.org")
+      "* TODO %^{Title}\nSCHEDULED: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?")))
+  (org-agenda-custom-commands
+   '(("r" "Triage" todo "TRIAGE")
+     ("d" "Today (no triage)" agenda ""
+      ((org-agenda-span 'day)
+       (org-agenda-skip-function
+        '(org-agenda-skip-entry-if 'todo '("TRIAGE")))))))
+  :config
+  ;; Capture fails if the directory is missing.
+  (make-directory org-directory t))
+
 ;;; UI mods
 
 ;; Window dividers as a continuous line (│ instead of |), without the
